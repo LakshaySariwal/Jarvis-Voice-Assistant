@@ -3,10 +3,12 @@ import webbrowser
 import pyttsx3
 import time
 import musiclib
-
+import feedparser
+import pyjokes
 
 
 r = sr.Recognizer()
+api_key = " c7c7680dda394a8d89e7836994ebca6a"
 
 r.pause_threshold = 1.2   # slight pauses in speech
 
@@ -21,6 +23,38 @@ def speak(text):
     engine.say(text)
     engine.runAndWait()
     engine.stop()
+
+def jokes():
+    joke = pyjokes.get_joke()
+    print(joke)
+    speak(joke)
+
+
+def get_news():
+    try:
+        speak("Fetching the latest news")
+
+        feed = feedparser.parse("https://timesofindia.indiatimes.com/rssfeedstopstories.cms")
+
+        articles = feed.entries
+
+        if not articles:
+            speak("No news available right now")
+            return
+
+        speak("Here are the latest headlines from India")
+
+        for i in range(3):
+            headline = articles[i].title
+            print(f"Headline {i+1}: {headline}")
+            speak(headline)
+
+        speak("That is all for now")
+
+    except Exception as e:
+        print("Error:", e)
+        speak("There was an error fetching the news")
+
 
 def processcommand(c):
     c = c.lower()
@@ -46,6 +80,14 @@ def processcommand(c):
         link=musiclib.music[song]
         webbrowser.open(link)
 
+    elif "news" in c:
+        get_news()
+
+    elif "joke" in c:
+        jokes()
+        speak("hehehehehehe")
+
+
         
 
 
@@ -68,7 +110,7 @@ if __name__ == "__main__":
 
             if "jarvis" in word.lower():
                 print("jarvis is just coming...")
-                speak("whats wrong")
+                speak("yes my lord")
                 # time.sleep(1.5)
 
                 with sr.Microphone() as source:
