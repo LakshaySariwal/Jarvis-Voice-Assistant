@@ -5,10 +5,11 @@ import time
 import musiclib
 import feedparser
 import pyjokes
+import datetime
+
 
 
 r = sr.Recognizer()
-api_key = " c7c7680dda394a8d89e7836994ebca6a"
 
 r.pause_threshold = 1.2   # slight pauses in speech
 
@@ -26,8 +27,22 @@ def speak(text):
 
 def jokes():
     joke = pyjokes.get_joke()
-    print(joke)
     speak(joke)
+
+def greet_user():
+    hour = datetime.datetime.now().hour
+    current_time = datetime.datetime.now().strftime("%I:%M %p")
+
+    if 5 <= hour < 12:
+        greeting = "Good Morning"
+    elif 12 <= hour < 17:
+        greeting = "Good Afternoon"
+    elif 17 <= hour < 21:
+        greeting = "Good Evening"
+    else:
+        greeting = "Good Night"
+
+    speak(f" jai shree raam !. {greeting}. The current time is {current_time}")
 
 
 def get_news():
@@ -46,7 +61,7 @@ def get_news():
 
         for i in range(3):
             headline = articles[i].title
-            print(f"Headline {i+1}: {headline}")
+            # print(f"Headline {i+1}: {headline}")
             speak(headline)
 
         speak("That is all for now")
@@ -87,12 +102,40 @@ def processcommand(c):
         jokes()
         speak("hehehehehehe")
 
+    elif "good morning" in c or "good evening" in c or "time" in c or "greet" in c:
+        greet_user()
+
+    elif "goodbye" in c or "bye" in c or "exit" in c or "stop" in c:
+        speak("Are you sure you want to shut me down?")
+
+        try:
+            with sr.Microphone() as source:
+                print("Waiting for confirmation...")
+                audio = r.listen(source, timeout=5, phrase_time_limit=4)
+
+            confirmation = r.recognize_google(audio)
+            print("Confirmation:", confirmation)
+
+            if "yes" or "han" in confirmation.lower():
+                speak("Goodbye. Shutting down now.")
+                exit()
+            else:
+                speak("Okay, I will continue working.")
+
+        except Exception as e:
+            print("Error during confirmation:", e)
+            speak("I did not catch that. Continuing operation.")
+
+
+
 
         
 
 
 if __name__ == "__main__":
     speak("   Initializing Jarvis   ")
+    greet_user()
+
 
     # Calibrate mic once
     with sr.Microphone() as source:
